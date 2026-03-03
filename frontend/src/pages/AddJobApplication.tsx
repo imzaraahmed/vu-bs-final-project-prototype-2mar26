@@ -13,10 +13,9 @@ import {
 import { Link, useNavigate } from "react-router-dom"
 
 import axios from "axios"
-import { useEffect, useState } from "react"
+import { useState } from "react"
 
-type Profile = {
-  id?: number
+type JobApplication = {
   first_name: string
   last_name: string
   email: string
@@ -26,10 +25,10 @@ type Profile = {
   employment_status: string
 }
 
-export default function EditProfileIntegratedPage() {
+export default function AddJobApplicationPage() {
   const navigate = useNavigate()
 
-  const [profile, setProfile] = useState<Profile>({
+  const [JobApplication, setJobApplication] = useState<JobApplication>({
     first_name: "",
     last_name: "",
     email: "",
@@ -39,75 +38,60 @@ export default function EditProfileIntegratedPage() {
     employment_status: ""
   })
 
+  const [resumeFile, setResumeFile] = useState<File | null>(null)
   const [loading, setLoading] = useState(false)
 
-  // Fetch existing profile
-  useEffect(() => {
-    const fetchProfile = async () => {
-      try {
-        const res = await axios.get<Profile[]>(
-          "http://localhost:5000/api/profiles"
-        )
-
-if (res.data.length > 0) {
-        const data = res.data[0]
-
-        setProfile({
-          ...data,
-          available_start_date: data.available_start_date
-            ? data.available_start_date.split("T")[0] // ✅ FIX
-            : ""
-        })
-      }
-      } catch (err) {
-        console.error("Failed to fetch profile:", err)
-      }
-    }
-
-    fetchProfile()
-  }, [])
-
-  // Handle text input changes
-  const handleChange = (
-    e: React.ChangeEvent<HTMLInputElement>
-  ) => {
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setProfile((prev) => ({
+    setJobApplication((prev) => ({
       ...prev,
       [name]: value
     }))
   }
 
-  // Handle select change
   const handleSelectChange = (value: string) => {
-    setProfile((prev) => ({
+    setJobApplication((prev) => ({
       ...prev,
       employment_status: value
     }))
   }
 
-  // Submit form
+  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    if (e.target.files && e.target.files.length > 0) {
+      setResumeFile(e.target.files[0])
+    }
+  }
+
   const handleSubmit = async () => {
     try {
       setLoading(true)
 
-      if (profile.id) {
-        // UPDATE existing profile
-        await axios.put(
-          `http://localhost:5000/api/profiles/${profile.id}`,
-          profile
-        )
-      } else {
-        // CREATE new profile
-        await axios.post(
-          "http://localhost:5000/api/profiles",
-          profile
-        )
+      const formData = new FormData()
+      formData.append("first_name", JobApplication.first_name)
+      formData.append("last_name", JobApplication.last_name)
+      formData.append("email", JobApplication.email)
+      formData.append("phone", JobApplication.phone)
+      formData.append("position", JobApplication.position)
+      formData.append("available_start_date", JobApplication.available_start_date)
+      formData.append("employment_status", JobApplication.employment_status)
+
+      if (resumeFile) {
+        formData.append("resume", resumeFile)
       }
 
-      navigate("/profile")
+      await axios.post(
+        "http://localhost:5000/api/jobapplications",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data"
+          }
+        }
+      )
+
+      navigate("/jobapplications")
     } catch (err) {
-      console.error("Failed to save profile:", err)
+      console.error("Failed to create profile:", err)
     } finally {
       setLoading(false)
     }
@@ -115,27 +99,25 @@ if (res.data.length > 0) {
 
   return (
     <div className="container mx-auto py-10 space-y-8">
-      {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Edit My Profile  - Integrated</h1>
+          <h1 className="text-3xl font-bold">Add Job Application</h1>
           <p className="text-muted-foreground text-sm">
-            Edit your profile information and details
+            Fill in job application information
           </p>
         </div>
 
         <div className="flex gap-4">
-          <Link to="/profile">
+          <Link to="/jobapplications">
             <Button variant="outline">Cancel</Button>
           </Link>
 
           <Button onClick={handleSubmit} disabled={loading}>
-            {loading ? "Updating..." : "Update"}
+            {loading ? "Creating..." : "Create"}
           </Button>
         </div>
       </div>
 
-      {/* Personal Information Card */}
       <Card>
         <CardHeader>
           <CardTitle>My Personal Information</CardTitle>
@@ -145,47 +127,27 @@ if (res.data.length > 0) {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
             <div className="space-y-2">
               <Label>First Name</Label>
-              <Input
-                name="first_name"
-                value={profile.first_name}
-                onChange={handleChange}
-              />
+              <Input name="first_name" value={JobApplication.first_name} onChange={handleChange} />
             </div>
 
             <div className="space-y-2">
               <Label>Last Name</Label>
-              <Input
-                name="last_name"
-                value={profile.last_name}
-                onChange={handleChange}
-              />
+              <Input name="last_name" value={JobApplication.last_name} onChange={handleChange} />
             </div>
 
             <div className="space-y-2">
               <Label>Email</Label>
-              <Input
-                name="email"
-                value={profile.email}
-                onChange={handleChange}
-              />
+              <Input name="email" value={JobApplication.email} onChange={handleChange} />
             </div>
 
             <div className="space-y-2">
               <Label>Phone</Label>
-              <Input
-                name="phone"
-                value={profile.phone}
-                onChange={handleChange}
-              />
+              <Input name="phone" value={JobApplication.phone} onChange={handleChange} />
             </div>
 
             <div className="space-y-2">
               <Label>Position Looking</Label>
-              <Input
-                name="position"
-                value={profile.position}
-                onChange={handleChange}
-              />
+              <Input name="position" value={JobApplication.position} onChange={handleChange} />
             </div>
 
             <div className="space-y-2">
@@ -193,7 +155,7 @@ if (res.data.length > 0) {
               <Input
                 type="date"
                 name="available_start_date"
-                value={profile.available_start_date}
+                value={JobApplication.available_start_date}
                 onChange={handleChange}
               />
             </div>
@@ -201,7 +163,7 @@ if (res.data.length > 0) {
             <div>
               <Label className="mb-2">Employment Status</Label>
               <Select
-                value={profile.employment_status}
+                value={JobApplication.employment_status}
                 onValueChange={handleSelectChange}
               >
                 <SelectTrigger className="w-[180px]">
@@ -211,18 +173,21 @@ if (res.data.length > 0) {
                 <SelectContent>
                   <SelectGroup>
                     <SelectItem value="Employed">Employed</SelectItem>
-                    <SelectItem value="Self-Employed">
-                      Self-Employed
-                    </SelectItem>
-                    <SelectItem value="Unemployed">
-                      Unemployed
-                    </SelectItem>
-                    <SelectItem value="Student">
-                      Student
-                    </SelectItem>
+                    <SelectItem value="Self-Employed">Self-Employed</SelectItem>
+                    <SelectItem value="Unemployed">Unemployed</SelectItem>
+                    <SelectItem value="Student">Student</SelectItem>
                   </SelectGroup>
                 </SelectContent>
               </Select>
+            </div>
+
+            <div className="space-y-2">
+              <Label>Upload Resume (PDF/DOC)</Label>
+              <Input
+                type="file"
+                accept=".pdf,.doc,.docx"
+                onChange={handleFileChange}
+              />
             </div>
           </div>
         </CardContent>

@@ -36,10 +36,10 @@ const upload = multer({
 // =============================
 // GET Single Profile
 // =============================
-router.get("/", (req, res) => {
+router.get("/:id", (req, res) => {
   db.query(
-    "SELECT * FROM applicants WHERE id = ?",
-    [1],
+    "SELECT * FROM job_application WHERE id = ?",
+    [req.params.id],
     (err, result) => {
       if (err) return res.status(500).json(err);
       res.json(result);
@@ -76,7 +76,7 @@ router.put("/:id", upload.single("resume"), (req, res) => {
   if (resumePath) {
     // If new resume uploaded
     sql = `
-      UPDATE applicants
+      UPDATE job_application
       SET first_name=?, last_name=?, email=?, phone=?, position=?, 
           available_start_date=?, employment_status=?, resume=?
       WHERE id=?
@@ -96,7 +96,7 @@ router.put("/:id", upload.single("resume"), (req, res) => {
   } else {
     // If no resume uploaded
     sql = `
-      UPDATE applicants
+      UPDATE job_application
       SET first_name=?, last_name=?, email=?, phone=?, position=?, 
           available_start_date=?, employment_status=?
       WHERE id=?
@@ -123,5 +123,95 @@ router.put("/:id", upload.single("resume"), (req, res) => {
     });
   });
 });
+
+
+// =============================
+// GET All Applicants
+// =============================
+router.get("/", (req, res) => {
+  const sql = "SELECT * FROM job_application";
+
+  db.query(sql, (err, results) => {
+    if (err) {
+      return res.status(500).json({
+        error: "Database error",
+        details: err,
+      });
+    }
+
+    res.status(200).json({
+      message: "Applicants fetched successfully",
+      total: results.length,
+      data: results,
+    });
+  });
+});
+
+
+// =============================
+// CREATE New Applicant WITH FILE
+// =============================
+router.post("/", upload.single("resume"), (req, res) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    phone,
+    position,
+    available_start_date,
+    employment_status,
+  } = req.body;
+
+  let resumePath = null;
+
+  // If resume uploaded
+  if (req.file) {
+    resumePath = `uploads/${req.file.filename}`;
+  }
+
+  const sql = `
+    INSERT INTO job_application 
+    (first_name, last_name, email, phone, position, 
+     available_start_date, employment_status, resume)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    first_name,
+    last_name,
+    email,
+    phone,
+    position,
+    available_start_date,
+    employment_status,
+    resumePath,
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    res.status(201).json({
+      message: "Applicant created successfully",
+      applicantId: result.insertId,
+      resume: resumePath,
+    });
+  });
+});
+
+
+
+// =============================
+// DELETE Applicant
+// =============================
+router.delete("/:id", (req, res) => {
+  const { id } = req.params;
+    // Delete the applicant from the database
+    const deleteSql = "DELETE FROM job_application WHERE id = ?";
+    db.query(deleteSql, [id], (err, result) => {
+      if (err) return res.status(500).json(err);
+      res.json({ message: "Applicant deleted successfully" });
+    });
+  });
+
 
 module.exports = router;

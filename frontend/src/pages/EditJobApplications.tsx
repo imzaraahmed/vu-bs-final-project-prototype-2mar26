@@ -10,12 +10,12 @@ import {
   SelectTrigger,
   SelectValue
 } from "@/components/ui/select"
-import { Link, useNavigate } from "react-router-dom"
+import { Link, useNavigate, useParams } from "react-router-dom"
 
 import axios from "axios"
 import { useEffect, useState } from "react"
 
-type Profile = {
+type JobApplication = {
   id?: number
   first_name: string
   last_name: string
@@ -27,10 +27,12 @@ type Profile = {
   resume?: string // URL to resume file
 }
 
-export default function EditProfileIntegratedFileUPloadPage() {
+export default function EditJobApplicationPage() {
+
+  const { id } = useParams();
   const navigate = useNavigate()
 
-  const [profile, setProfile] = useState<Profile>({
+  const [JobApplication, setJobApplication] = useState<JobApplication>({
     first_name: "",
     last_name: "",
     email: "",
@@ -46,16 +48,18 @@ export default function EditProfileIntegratedFileUPloadPage() {
 
   // Fetch existing profile
   useEffect(() => {
-    const fetchProfile = async () => {
+    const fetchJobApplicatione = async () => {
       try {
-        const res = await axios.get<Profile[]>(
-          "http://localhost:5000/api/profileupload"
+        const res = await axios.get<JobApplication[]>(
+          `http://localhost:5000/api/jobapplications/${id}`
         )
+
+        console.log("Fetched job application:", res.data[0])
 
         if (res.data.length > 0) {
           const data = res.data[0]
 
-          setProfile({
+          setJobApplication({
             ...data,
             available_start_date: data.available_start_date
               ? data.available_start_date.split("T")[0]
@@ -63,17 +67,17 @@ export default function EditProfileIntegratedFileUPloadPage() {
           })
         }
       } catch (err) {
-        console.error("Failed to fetch profile:", err)
+        console.error("Failed to fetch job application:", err)
       }
     }
 
-    fetchProfile()
+    fetchJobApplicatione()
   }, [])
 
   // Handle text input changes
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target
-    setProfile((prev) => ({
+    setJobApplication((prev) => ({
       ...prev,
       [name]: value
     }))
@@ -81,7 +85,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
 
   // Handle select change
   const handleSelectChange = (value: string) => {
-    setProfile((prev) => ({
+    setJobApplication((prev) => ({
       ...prev,
       employment_status: value
     }))
@@ -100,21 +104,21 @@ export default function EditProfileIntegratedFileUPloadPage() {
       setLoading(true)
 
       const formData = new FormData()
-      formData.append("first_name", profile.first_name)
-      formData.append("last_name", profile.last_name)
-      formData.append("email", profile.email)
-      formData.append("phone", profile.phone)
-      formData.append("position", profile.position)
-      formData.append("available_start_date", profile.available_start_date)
-      formData.append("employment_status", profile.employment_status)
+      formData.append("first_name", JobApplication.first_name)
+      formData.append("last_name", JobApplication.last_name)
+      formData.append("email", JobApplication.email)
+      formData.append("phone", JobApplication.phone)
+      formData.append("position", JobApplication.position)
+      formData.append("available_start_date", JobApplication.available_start_date)
+      formData.append("employment_status", JobApplication.employment_status)
 
       if (resumeFile) {
         formData.append("resume", resumeFile)
       }
 
-      if (profile.id) {
+      if (JobApplication.id) {
         await axios.put(
-          `http://localhost:5000/api/profileupload/${profile.id}`,
+          `http://localhost:5000/api/jobapplications/${JobApplication.id}`,
           formData,
           {
             headers: {
@@ -130,7 +134,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
         })
       }
 
-      navigate("/profile")
+      navigate("/jobapplications")
     } catch (err) {
       console.error("Failed to save profile:", err)
     } finally {
@@ -143,14 +147,14 @@ export default function EditProfileIntegratedFileUPloadPage() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-3xl font-bold">Edit My Profile - Integrated</h1>
+          <h1 className="text-3xl font-bold">Edit Job Application</h1>
           <p className="text-muted-foreground text-sm">
-            Edit your profile information and details
+            Edit job application information and details
           </p>
         </div>
 
         <div className="flex gap-4">
-          <Link to="/profile">
+          <Link to="/jobapplications">
             <Button variant="outline">Cancel</Button>
           </Link>
 
@@ -172,7 +176,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Label>First Name</Label>
               <Input
                 name="first_name"
-                value={profile.first_name}
+                value={JobApplication.first_name}
                 onChange={handleChange}
               />
             </div>
@@ -181,7 +185,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Label>Last Name</Label>
               <Input
                 name="last_name"
-                value={profile.last_name}
+                value={JobApplication.last_name}
                 onChange={handleChange}
               />
             </div>
@@ -190,7 +194,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Label>Email</Label>
               <Input
                 name="email"
-                value={profile.email}
+                value={JobApplication.email}
                 onChange={handleChange}
               />
             </div>
@@ -199,7 +203,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Label>Phone</Label>
               <Input
                 name="phone"
-                value={profile.phone}
+                value={JobApplication.phone}
                 onChange={handleChange}
               />
             </div>
@@ -208,7 +212,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Label>Position Looking</Label>
               <Input
                 name="position"
-                value={profile.position}
+                value={JobApplication.position}
                 onChange={handleChange}
               />
             </div>
@@ -218,7 +222,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
               <Input
                 type="date"
                 name="available_start_date"
-                value={profile.available_start_date}
+                value={JobApplication.available_start_date}
                 onChange={handleChange}
               />
             </div>
@@ -226,7 +230,7 @@ export default function EditProfileIntegratedFileUPloadPage() {
             <div>
               <Label className="mb-2">Employment Status</Label>
               <Select
-                value={profile.employment_status}
+                value={JobApplication.employment_status}
                 onValueChange={handleSelectChange}
               >
                 <SelectTrigger className="w-[180px]">
@@ -254,9 +258,9 @@ export default function EditProfileIntegratedFileUPloadPage() {
               />
 
               {/* Show current resume if exists */}
-              {profile.resume && (
+              {JobApplication.resume && (
                 <a
-                  href={`http://localhost:5000/${profile.resume}`}
+                  href={`http://localhost:5000/${JobApplication.resume}`}
                   target="_blank"
                   rel="noopener noreferrer"
                   className="text-blue-600 underline"

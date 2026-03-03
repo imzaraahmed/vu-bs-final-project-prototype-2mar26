@@ -1,5 +1,5 @@
 import { NavLink } from "react-router-dom"
-import { LayoutDashboard, Briefcase, Bell, User } from "lucide-react"
+import { LayoutDashboard, Briefcase, Bell, } from "lucide-react"
 import { Avatar, AvatarFallback, } from "@/components/ui/avatar"
 
 export default function AppHeader() {
@@ -21,9 +21,9 @@ export default function AppHeader() {
               Dashboard
             </NavLink>
 
-            <NavLink to="/applications" className={navClass}>
+            <NavLink to="/jobapplications" className={navClass}>
               <Briefcase size={18} />
-              Applications
+              Job Applications
             </NavLink>
 
             <NavLink to="/reminders" className={navClass}>
@@ -31,10 +31,6 @@ export default function AppHeader() {
               Reminders
             </NavLink>
 
-            <NavLink to="/profile" className={navClass}>
-              <User size={18} />
-              Profile
-            </NavLink>
           </nav>
         </div>
 
