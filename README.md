@@ -22,3 +22,6 @@
 - npm install
 - Start Server:
 - npm run dev
+
+## Database Setup:
+- Import Database.sql into MySQL

@@ -25,7 +25,7 @@ type JobApplication = {
   employment_status: string
 }
 
-export default function AddJobApplicationPage() {
+export default function AddJobApplicationNoCaptchaPage() {
   const navigate = useNavigate()
 
   const [JobApplication, setJobApplication] = useState<JobApplication>({

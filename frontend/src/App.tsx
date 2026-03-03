@@ -4,9 +4,11 @@ import AppHeader from "./components/custom/AppHeader";
 import DashboardPage from "./pages/Dashboard";
 import ReminderPage from "./pages/Reminders";
 
-import AddJobApplicationPage from "./pages/AddJobApplication";
+
 import JobApplicationPage from "./pages/JobApplications";
 import EditJobApplicationPage from "./pages/EditJobApplications";
+import AddJobApplicationPage from "./pages/AddJobApplications";
+
 
 
 
@@ -25,6 +27,8 @@ function App() {
 
       <Route path="/jobapplications" element={<JobApplicationPage />} />
       <Route path="/addjobapplication" element={<AddJobApplicationPage />} />
+
+      
  
       <Route path="/editjobapplication/:id" element={<EditJobApplicationPage />} />
 

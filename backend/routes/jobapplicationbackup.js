@@ -3,7 +3,6 @@ const router = express.Router();
 const db = require("../db");
 const multer = require("multer");
 const path = require("path");
-const axios = require('axios');
 
 // =============================
 // Multer Storage Configuration
@@ -149,102 +148,55 @@ router.get("/", (req, res) => {
 });
 
 
-
-
 // =============================
-// CREATE New Applicant WITH FILE + reCAPTCHA
+// CREATE New Applicant WITH FILE
 // =============================
-router.post("/", upload.single("resume"), async (req, res) => {
-  try {
-    const {
-      first_name,
-      last_name,
-      email,
-      phone,
-      position,
-      available_start_date,
-      employment_status,
-      captchaToken, // coming from frontend
-    } = req.body;
+router.post("/", upload.single("resume"), (req, res) => {
+  const {
+    first_name,
+    last_name,
+    email,
+    phone,
+    position,
+    available_start_date,
+    employment_status,
+  } = req.body;
 
-    // =============================
-    // 1️⃣ Verify reCAPTCHA First
-    // =============================
-    if (!captchaToken) {
-      return res.status(400).json({
-        message: "reCAPTCHA token missing",
-      });
-    }
+  let resumePath = null;
 
-    const verifyURL = "https://www.google.com/recaptcha/api/siteverify";
-
-    const captchaResponse = await axios.post(
-      verifyURL,
-      null,
-      {
-        params: {
-          secret: process.env.RECAPTCHA_SECRET_KEY,
-          response: captchaToken,
-        },
-      }
-    );
-
-    if (!captchaResponse.data.success) {
-      return res.status(403).json({
-        message: "reCAPTCHA verification failed",
-      });
-    }
-
-    // =============================
-    // 2️⃣ Handle File Upload
-    // =============================
-    let resumePath = null;
-
-    if (req.file) {
-      resumePath = `uploads/${req.file.filename}`;
-    }
-
-    // =============================
-    // 3️⃣ Insert Into Database
-    // =============================
-    const sql = `
-      INSERT INTO job_application 
-      (first_name, last_name, email, phone, position, 
-       available_start_date, employment_status, resume)
-      VALUES (?, ?, ?, ?, ?, ?, ?, ?)
-    `;
-
-    const values = [
-      first_name,
-      last_name,
-      email,
-      phone,
-      position,
-      available_start_date,
-      employment_status,
-      resumePath,
-    ];
-
-    db.query(sql, values, (err, result) => {
-      if (err) {
-        return res.status(500).json(err);
-      }
-
-      res.status(201).json({
-        message: "Applicant created successfully",
-        applicantId: result.insertId,
-        resume: resumePath,
-      });
-    });
-
-  } catch (error) {
-    console.error("Error creating applicant:", error);
-    res.status(500).json({
-      message: "Server error",
-    });
+  // If resume uploaded
+  if (req.file) {
+    resumePath = `uploads/${req.file.filename}`;
   }
-});
 
+  const sql = `
+    INSERT INTO job_application 
+    (first_name, last_name, email, phone, position, 
+     available_start_date, employment_status, resume)
+    VALUES (?, ?, ?, ?, ?, ?, ?, ?)
+  `;
+
+  const values = [
+    first_name,
+    last_name,
+    email,
+    phone,
+    position,
+    available_start_date,
+    employment_status,
+    resumePath,
+  ];
+
+  db.query(sql, values, (err, result) => {
+    if (err) return res.status(500).json(err);
+
+    res.status(201).json({
+      message: "Applicant created successfully",
+      applicantId: result.insertId,
+      resume: resumePath,
+    });
+  });
+});
 
 
 
