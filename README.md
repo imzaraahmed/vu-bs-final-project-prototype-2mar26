@@ -1,4 +1,3 @@
-
 # Job Application Tracker - Prototype
 
 Back-end (Node.js + Express)
@@ -23,7 +22,3 @@ cd backend
 npm install
 Start Server:
 npm run dev
-
-
-
-
