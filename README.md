@@ -1,24 +1,24 @@
 
-Job Application Tracker - Prototype
+# Job Application Tracker - Prototype
 
 Back-end (Node.js + Express)
 Front-end (React + Shadcn/ui)
 Database (MySQL)
 
-Root folders and files:
+## Root folders and files:
 Backend
 Frontend
 Database.sql
 README.md
 
-Backend Setup:
+## Backend Setup:
 cd backend
 npm install
 create .env (add db credentials)
 Start Server:
 node server.js
 
-Frontend Setup:
+## Frontend Setup:
 cd backend
 npm install
 Start Server:
