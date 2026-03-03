@@ -1,5 +1,5 @@
 import { Button } from "@/components/ui/button"
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card"
+import { Card, CardContent, } from "@/components/ui/card"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
 import {
@@ -98,13 +98,11 @@ export default function AddJobApplicationPage() {
   }
 
   return (
-    <div className="container mx-auto py-10 space-y-8">
-      <div className="flex items-center justify-between">
+    <div className="p-6">
+      <div className="flex items-center justify-between mb-4">
         <div>
           <h1 className="text-3xl font-bold">Add Job Application</h1>
-          <p className="text-muted-foreground text-sm">
-            Fill in job application information
-          </p>
+
         </div>
 
         <div className="flex gap-4">
@@ -119,9 +117,7 @@ export default function AddJobApplicationPage() {
       </div>
 
       <Card>
-        <CardHeader>
-          <CardTitle>My Personal Information</CardTitle>
-        </CardHeader>
+
 
         <CardContent>
           <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
